@@ -37,7 +37,7 @@
                             data-searchpokemon="@Model.SearchPokemon"
                             data-pokemonspeciename="@Model.PokemonSpecieName"
                       >
-                        Enviar Correos
+                        Enviar Correo
                     </button>
                     
                 </div>
@@ -151,20 +151,21 @@
                         </a>
                     </li>
                 }
-                <li class="page-item @(!Model.Pagination.HasNextPage?"disabled":"")">
+                <li class="page-item ">
                     <a class="page-link" asp-action="Index" 
                         asp-route-pageActual="@(Model.Pagination.TotalPages)" 
                         asp-route-searchPokemon="@Model.SearchPokemon"
                         asp-route-pokemonSpecieName="@Model.PokemonSpecieName"
-                        disabled="@(!Model.Pagination.HasNextPage)">
+                        >
                         Final
                     </a>
                 </li>
-                <li class="page-item">
+                <li class="page-item @(!Model.Pagination.HasNextPage?"disabled":"")">
                     <a class="page-link" asp-action="Index" 
                         asp-route-pageActual="@(Model.Pagination.PageIndex+1)" 
                         asp-route-searchPokemon="@Model.SearchPokemon"
-                        asp-route-pokemonSpecieName="@Model.PokemonSpecieName">
+                        asp-route-pokemonSpecieName="@Model.PokemonSpecieName"
+                        disabled="@(!Model.Pagination.HasNextPage)">
                         &raquo;
                     </a>
                 </li>
