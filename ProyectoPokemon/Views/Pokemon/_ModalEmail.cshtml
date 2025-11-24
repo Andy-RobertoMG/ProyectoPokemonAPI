@@ -1,0 +1,41 @@
+﻿@model PokemonModalEmailViewModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">Enviar Correo</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<form asp-controller="Pokemon" asp-action="SendEmailMessage" method="post">
+    @Html.AntiForgeryToken()
+    <div class="modal-body">
+        <input asp-for=ActualPage type="hidden">
+        <input asp-for=SearchPokemon type="hidden">
+        <input asp-for=PokemonSpecieName type="hidden">
+        <div class="row">
+            <div class="col-12">
+                <label for="email" class="form-label">Remitente:</label>
+                <input asp-for=UserRemitentEmail type="email" class="form-control" id="email"  > 
+                <span asp-validation-for="UserRemitentEmail" class="invalid-feedback"></span>
+            </div>
+            <div class="col-12">
+                <label for="subject" class="form-label">Asunto:</label>
+                <input asp-for=Subject type="text" class="form-control" id="subject"  > 
+            </div>
+            <div class="col-12">
+                <label for="comment" class="form-label">Comentarios:</label>
+                <textarea asp-for=Comment class="form-control" id="email" style={min-height:3rem;}></textarea>
+            </div>
+            <div class="col-12">
+                <label for="FileName" class="form-label">Archivo:</label>
+                <input id="FileName" asp-for=FileName class="form-control" readonly/>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Enviar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>

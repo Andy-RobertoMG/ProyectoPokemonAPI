@@ -1,0 +1,196 @@
+﻿@model PokemonIndexViewModel
+@{
+    ViewData["Title"] = "PokemonAPI";
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+    </div>
+}
+<form asp-action="Index" method="get">
+    <div class="container-fluid bg-light d-flex justify-content-between pt-2 pb-2 mb-3">
+        <div class="container d-flex justify-content-between">
+            <div>
+                <h4 class="fw-bolder">Lista pokemones</h4>
+            </div>
+            <div  class="d-flex align-items-end gap-3">
+                <div>
+                    <a class="btn btn-outline-primary" asp-action="Index"
+                       asp-route-pageActual="1"
+                       asp-route-searchPokemon=""
+                       asp-route-pokemonSpecieName="">
+                        Limpiar filtros
+                    </a>
+                    
+                </div>
+                <div>
+                    <button type="button" class="btn btn-outline-secondary" 
+                            onclick="showPartial(this)"
+                            data-pageactual="@Model.Pagination.PageIndex"
+                            data-searchpokemon="@Model.SearchPokemon"
+                            data-pokemonspeciename="@Model.PokemonSpecieName"
+                      >
+                        Enviar Correos
+                    </button>
+                    
+                </div>
+                <div>
+                    <a class="btn btn-success"
+                       asp-action="ExportToExcel"
+                       asp-route-pageActual="@(Model.Pagination.PageIndex)"
+                       asp-route-searchPokemon="@Model.SearchPokemon"
+                       asp-route-pokemonSpecieName="@Model.PokemonSpecieName">
+                        Exportar a excel
+                    </a>
+                </div>
+                <div>
+                    <label for="PokemonSpecie" class="form-label">Filtrar por Especie</label>
+                    <select asp-for="PokemonSpecieName" class="form-select"
+                            id="PokemonSpecie"
+                            name="pokemonSpecieName"
+                            onchange="this.form.submit()">
+                        <option value="">Todas las especies</option>
+                        @foreach (var pokemon in Model.PokemonSpeciesListResponse.Results)
+                        {
+                            <option value="@pokemon.Name">@pokemon.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th scope="col">
+                        <span>
+                            Nombre
+                        </span>
+                        <input class="form-control"  asp-for="SearchPokemon" placeholder="Buscar..." style="max-width:200px;" />
+                    </th>
+                    @* <th scope="col"></th> *@
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Pagination.Items)
+                {
+                    <tr>
+                        <td>
+                            <img src="@item.Sprites.Other.OfficialArtwork.FrontDefault" loading="lazy" alt="@item.Name" width="50" height="50" />
+                        </td>
+                        <td>@item.Name</td>
+                        @* <td>
+                            <button class="btn btn-primary" data-id="@item.Id">Detalle</button>
+                        </td> *@
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</form>
+<div class="container">
+    <div class="w-100 d-flex justify-content-center">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item @(!Model.Pagination.HasPreviousPage?"disabled":"")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-pageActual="@(Model.Pagination.PageIndex-1)"
+                       asp-route-searchPokemon="@Model.SearchPokemon"
+                       asp-route-pokemonSpecieName="@Model.PokemonSpecieName"
+                       disabled="@(!Model.Pagination.HasPreviousPage)">
+                        &laquo;
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index" 
+                            asp-route-pageActual="@(1)" 
+                            asp-route-searchPokemon="@Model.SearchPokemon" 
+                            asp-route-pokemonSpecieName="@Model.PokemonSpecieName">
+                        Inicio
+                    </a>
+                </li>
+                @{
+                    int pageIndex = Model.Pagination.PageIndex;
+                    int totalPages = Model.Pagination.TotalPages;
+
+                    // Calcular el rango de paginas
+                    int initialPage = pageIndex - 1;
+                    int finalPage = pageIndex + 1;
+
+                    // Ajustar si estamos al inicio
+                    if (initialPage < 1)
+                    {
+                        initialPage = 1;
+                        finalPage = Math.Min(3, totalPages);
+                    }
+                    // Ajustar si estamos al final
+                    else if (finalPage > totalPages)
+                    {
+                        finalPage = totalPages;
+                        initialPage = Math.Max(1, totalPages - 2);
+                    }
+                }
+                @for (int i = initialPage; i <= finalPage; i++)
+                {
+                    <li class="page-item @(i==Model.Pagination.PageIndex?"active":"")">
+                        <a class="page-link" asp-action="Index" 
+                            asp-route-pageActual="@i" 
+                            asp-route-searchPokemon="@Model.SearchPokemon"
+                            asp-route-pokemonSpecieName="@Model.PokemonSpecieName">
+                            @i
+                        </a>
+                    </li>
+                }
+                <li class="page-item @(!Model.Pagination.HasNextPage?"disabled":"")">
+                    <a class="page-link" asp-action="Index" 
+                        asp-route-pageActual="@(Model.Pagination.TotalPages)" 
+                        asp-route-searchPokemon="@Model.SearchPokemon"
+                        asp-route-pokemonSpecieName="@Model.PokemonSpecieName"
+                        disabled="@(!Model.Pagination.HasNextPage)">
+                        Final
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index" 
+                        asp-route-pageActual="@(Model.Pagination.PageIndex+1)" 
+                        asp-route-searchPokemon="@Model.SearchPokemon"
+                        asp-route-pokemonSpecieName="@Model.PokemonSpecieName">
+                        &raquo;
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+<div class="modal fade" id="emailmodal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" id="modelContentEmail">
+            
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        function showPartial(element){
+            //Se obtienen los tres parametros necesarios para la llamada a la vista parcial
+            var pageActual = $(element).data("pageactual");
+            var searchPokemon = $(element).data("searchpokemon")??"";
+            var pokemonSpecieName = $(element).data("pokemonspeciename")??""; 
+            $.get(`/Pokemon/_ShowModalEmail?pageActual=${pageActual}&searchPokemon=${searchPokemon}&pokemonSpecieName=${pokemonSpecieName}`,
+                function (data) {
+                    $('#modelContentEmail').html(data);
+                    $('#emailmodal').modal("show"); 
+                })
+        }
+    </script>
+}
