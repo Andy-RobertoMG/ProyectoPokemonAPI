@@ -1,4 +1,5 @@
-﻿using ProyectoPokemon.IService;
+﻿using Microsoft.Extensions.Caching.Memory;
+using ProyectoPokemon.IService;
 using ProyectoPokemon.Models;
 using System.Xml.Linq;
 
@@ -7,9 +8,10 @@ namespace ProyectoPokemon.Service;
 public class PokemonAPIService : IPokemonAPIService
 {
     private string url = "https://pokeapi.co/api/v2/";
-    public PokemonAPIService()
+    private readonly IMemoryCache _cache;
+    public PokemonAPIService(IMemoryCache cache)
     {
-
+        _cache = cache;
     }
     public async Task<PokemonListResponse> GetList(int limit = 0, int offset =0)
     {
@@ -58,10 +60,22 @@ public class PokemonAPIService : IPokemonAPIService
     {
         //Obtener la especie de Pokémon por nombre
         var httpClient = new HttpClient();
+        if(_cache.TryGetValue("especie:" + name, out PokemonSpecies? cachedSpecies))
+        {
+            if (cachedSpecies is not null)
+            {
+                return cachedSpecies;
+            }
+        }
         var response = await httpClient.GetAsync($"{url}/pokemon-species/{name}");
         if (response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadFromJsonAsync<PokemonSpecies>() ?? new();
+        
+            var resultPokemon= await response.Content.ReadFromJsonAsync<PokemonSpecies>() ?? new();
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromMinutes(30));
+            _cache.Set("especie:" + name, resultPokemon, cacheEntryOptions);
+            return resultPokemon;
         }
         else
         {

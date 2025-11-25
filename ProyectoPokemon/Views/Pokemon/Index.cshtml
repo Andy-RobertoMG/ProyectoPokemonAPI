@@ -77,7 +77,7 @@
                         </span>
                         <input class="form-control"  asp-for="SearchPokemon" placeholder="Buscar..." style="max-width:200px;" />
                     </th>
-                    @* <th scope="col"></th> *@
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -88,9 +88,9 @@
                             <img src="@item.Sprites.Other.OfficialArtwork.FrontDefault" loading="lazy" alt="@item.Name" width="50" height="50" />
                         </td>
                         <td>@item.Name</td>
-                        @* <td>
-                            <button class="btn btn-primary" data-id="@item.Id">Detalle</button>
-                        </td> *@
+                        <td>
+                            <button class="btn btn-primary" type="button" data-name="@item.Name" onclick="showPartialDetailed(this)">Detalle</button>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -173,9 +173,16 @@
         </nav>
     </div>
 </div>
-<div class="modal fade" id="emailmodal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="emailmodal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="false">
     <div class="modal-dialog">
         <div class="modal-content" id="modelContentEmail">
+            
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalpokemon" tabindex="-1" aria-labelledby="pokemonModalLabel" aria-hidden="false">
+    <div class="modal-dialog">
+        <div class="modal-content" id="modelpokemoninfo">
             
         </div>
     </div>
@@ -192,6 +199,14 @@
                     $('#modelContentEmail').html(data);
                     $('#emailmodal').modal("show"); 
                 })
+        }
+        function showPartialDetailed(element){
+            var name = $(element).data("name");
+            $.get(`/Pokemon/_InfoPokemon?name=${name}`,
+            function (data) {
+                    $('#modelpokemoninfo').html(data);
+                    $('#modalpokemon').modal("show"); 
+                });
         }
     </script>
 }

@@ -1,0 +1,36 @@
+﻿@model PokemonModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">Pokemon @Model.Name #@Model.Id</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div class="w-100 mb-2 d-flex justify-content-center">
+        <img src="@Model.Sprites.Other.OfficialArtwork.FrontDefault" loading="lazy" alt="@Model.Name" width="200" height="200" />
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <label for="specie" class="form-label">Specie Name:</label>
+            <input type="text" value="@Model.Species.Name" class="form-control" id="specie" readonly>
+        </div>
+        <div class="col-12">
+            <label for="Weight" class="form-label">Weight:</label>
+            <input type="number" value="@Model.Weight" class="form-control" id="Weight" readonly>
+        </div> 
+        <div class="col-12">
+            <label for="height" class="form-label">Height:</label>
+            <input type="number" value="@Model.Height" class="form-control" id="height" readonly>
+        </div>
+        <div class="col-12">
+            <label for="BaseExperience" class="form-label">Base Experience:</label>
+            <input id="BaseExperience" value="@Model.BaseExperience" class="form-control" readonly />
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+</div>

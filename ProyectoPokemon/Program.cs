@@ -2,7 +2,7 @@ using ProyectoPokemon.IService;
 using ProyectoPokemon.Service;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<IPokemonAPIService, PokemonAPIService>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();

@@ -12,8 +12,12 @@ public class PokemonModel
 
     [JsonPropertyName("base_experience")]
     public int? BaseExperience { get; set;} = 0;
+    
     [JsonPropertyName("height")]
     public int? Height {get; set;} = 0;
+
+    [JsonPropertyName("weight")]
+    public int? Weight { get; set; } = 0;
 
     [JsonPropertyName("sprites")]
     public Sprites Sprites { get; set; } = new Sprites();

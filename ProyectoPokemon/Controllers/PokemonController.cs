@@ -46,9 +46,10 @@ public class PokemonController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> _InfoPokemon(int id)
+    public async Task<IActionResult> _InfoPokemon(string name)
     {
-        return PartialView("_PokemonInfoDetails", "");
+        var pokemon = await _pokemonService.GetPokemonByName(name);
+        return PartialView("_PokemonInfoDetails", pokemon);
     }
     [HttpGet]
     public async Task<IActionResult> ExportToExcel(int pageActual = 1, string searchPokemon = "", string pokemonSpecieName = "")
@@ -58,7 +59,9 @@ public class PokemonController : Controller
             
             var result = await LoadData(pageActual, searchPokemon, pokemonSpecieName);
             //Nombre del archivo
-            string nombreArchivo = $"Lista_Pokemons_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            //string nombreArchivo = $"Lista_Pokemons_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            //AMesta 24/Nov/25 Se cambia por GUID
+            string nombreArchivo = $"Lista_Pokemons_{Guid.NewGuid().ToString()}.xlsx";
             using MemoryStream file =GetFileExcel(result.Pagination.Items);
             return File(
                 file.ToArray(),
@@ -172,10 +175,10 @@ public class PokemonController : Controller
         }
         else
         {
-            //Si la espe
             var pokemonSpecie = await _pokemonService.GetPokemonSpecie(pokemonSpecieName);
             var taskPokemonsList = pokemonSpecie.Varieties.Select(v => _pokemonService.GetPokemonByUrl(v.Pokemon.Url));
             var pokemons = await Task.WhenAll(taskPokemonsList);
+            //Si hay mas pokemones/pokemons por especie de los que admite mostrar con el limite, se recortan para mantener el estadar de 10
             Pagination<PokemonModel> listPokemons = new(pokemons.Skip(offset).Take(limit).ToList(), pokemonSpecie.Varieties.Count, pageActual, limit);
             PokemonIndexViewModel viewModel = new PokemonIndexViewModel
             {
@@ -191,12 +194,15 @@ public class PokemonController : Controller
     [HttpGet]
     public IActionResult _ShowModalEmail(int pageActual = 1, string searchPokemon = "", string pokemonSpecieName = "")
     {
+         
+        string nombreArchivo = $"Lista_Pokemons_{Guid.NewGuid().ToString()}.xlsx";
         return PartialView("_ModalEmail", new PokemonModalEmailViewModel()
         {
             ActualPage = pageActual,
             SearchPokemon=searchPokemon,
             PokemonSpecieName = pokemonSpecieName,
-            FileName = $"Lista_Pokemons_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
+            //FileName = $"Lista_Pokemons_{Guid.NewGuid().ToString()}.xlsx"
+            FileName = $"Lista_Pokemons_{Guid.NewGuid().ToString()}.xlsx" //AMesta 24/Nov/25
         });
 
     }
@@ -208,11 +214,15 @@ public class PokemonController : Controller
             var result = await LoadData(pokemon.ActualPage, pokemon.SearchPokemon, pokemon.PokemonSpecieName);
             using var file = GetFileExcel(result.Pagination.Items);
             var emailToSend = new MimeMessage();
+
+            //Datos inicializadores de configuracion
             string emailFrom = _configuration["EmailFrom"];
             string host = _configuration["Host"];
             string userAutentication = _configuration["UserAuthentication"];
             string password = _configuration["Password"];
             int port = _configuration.GetValue<int>("Port");
+
+            //////////////////////////////////////////////////////
             emailToSend.From.Add(MailboxAddress.Parse(emailFrom));
             emailToSend.To.Add(MailboxAddress.Parse(pokemon.UserRemitentEmail));
             emailToSend.Subject = pokemon.Subject; 
